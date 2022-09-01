@@ -23,6 +23,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     price = models.IntegerField(default=0)
+    digital = models.BooleanField(default=False)
     image = models.ImageField()
 
     def __str__(self):
@@ -58,6 +59,15 @@ class Order(models.Model):
         total = sum([orderitem.quantity for orderitem in orderitems])
         return total
 
+    @property
+    def shipping(self):
+        shipping = False
+        orderitems = self.orderitem_set.all()
+        for orderitem in orderitems:
+            if orderitem.product.digital == False:
+                shipping = True
+        return shipping
+
 
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -69,6 +79,7 @@ class OrderItem(models.Model):
     def get_total(self):
         total = self.quantity * self.product.price
         return total
+
 
 
 class ShippingAddress(models.Model):
